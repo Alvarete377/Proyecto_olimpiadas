@@ -1,14 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import EncuentrosEquipos
+from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.views.generic import ListView
-# Create your views here.
+from .models import Encuentros, Disciplinas, Pistas, Arbitros, Equipos, EncuentrosEquipos
 
+# Vista basada en clase para listar encuentros (ListView)
+class EncuentrosListView(ListView):
+    model = Encuentros
+    context_object_name = 'encuentros'  # ← ¡IMPORTANTE!
 
-def index(request):
-    return HttpResponse("caca de vaca")
-
-'''
-class EncuentrosEquipos(ListView):
-    model = 'EncuentrosEquipos'
-'''

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Olimpiadas</title>
+    <style>
+        /* === PARTE 1: COLORES (Cámbialos si quieres) === */
+        body {
+            background-color: #444141;  /* Color de fondo de toda la página */
+            color: #ffffff;                /* Color del texto normal */
+            font-family: Arial;         /* Tipo de letra */
+            margin: 10;
+            padding: 10px;
+        }
+        
+        /* === PARTE 2: TÍTULO PRINCIPAL === */
+        h1 {
+            display: center ruby;
+            text-align: center;         /* Centra el texto */
+            color: #a882d4;            /* Color azul oscuro */
+            background-color: rgba(0, 0, 0, 0.788);    /* Fondo blanco */
+            padding: 20px;              /* Espacio alrededor */
+            border-radius: 10px;        /* Esquinas redondeadas */
+        }
+        
+        /* === PARTE 3: ENLACES BONITOS === */
+        .enlace-bonito {
+            display: inline-block;             /* Cada enlace en su propia línea */
+            background-color: #5e5d1d77;  /* Color azul */
+            color: white;               /* Letras blancas */
+            text-decoration: wavy;      /* Quita el subrayado */
+            padding: 10px;              /* Espacio interno */
+            margin: 10px 0;             /* Espacio entre enlaces */
+            border-radius: 10px;         /* Esquinas redondeadas */
+            text-align: center;         /* Texto centrado */
+            font-size: 18px;            /* Tamaño de letra */
+            border-left: 5px solid #22777a;
+        }
+        
+        /* === PARTE 4: CUANDO PASAS EL RATÓN === */
+        .enlace-bonito:hover {
+            background-color: #f855f856;  /* Se pone rojo al pasar ratón */
+        }
+        
+        /* === PARTE 5: ESTADÍSTICAS === */
+        .estadistica {
+            background-color: rgba(14, 10, 10, 0.753);    /* Fondo blanco */
+            padding: 15px;              /* Espacio interno */
+            margin: 10px 0;             /* Espacio entre estadísticas */
+            border-radius: 8px;         /* Esquinas redondeadas */
+            border-left: 5px solid #022c14;  /* Rayita verde a la izquierda */
+            border-right: 5px solid #022c14;
+            color: #ee53eec4;
+            display: inline-table;
+            
+        }
+        
+        .numero {
+            color: #ffffff;             /* Números en rojo */
+            font-weight: bold;          /* Números en negrita */
+            font-size: 20px;            /* Números más grandes */
+        }
+    </style>
+</head>
+<body>
+    <h1>Olimpiadas</h1>
+    <p style="text-align: center; font-size: 18px;">Gestiona encuentros deportivos, equipos y resultados</p>
+    
+    <!-- Enlaces principales -->
+    <div style="margin: 30px 0;">
+        <a href="{% url 'lista_encuentros' %}" class="enlace-bonito">Añadir encuentros</a>
+        <a href="{% url 'partidos' %}" class="enlace-bonito">Estadísticas</a>
+        <a href="/admin/" class="enlace-bonito">Admin de Django</a>
+    </div>
+
+    <!-- Estadísticas -->
+    <div>
+        <div class="estadistica">
+            Encuentros Totales:  <span class="numero">{{ encuentros_count }}</span> 
+        </div>
+        <div class="estadistica">
+            Equipos Registrados:  <span class="numero">{{ equipos_count }}</span> 
+        </div>
+        <div class="estadistica">
+            Disciplinas Activas:  <span class="numero">{{ disciplinas_count }}</span> 
+        </div>
+        <div class="estadistica">
+            Próximos Encuentros: <span class="numero">{{ encuentros_pendientes_count }}</span> 
+        </div>
+    </div>
+</body>
+</html>

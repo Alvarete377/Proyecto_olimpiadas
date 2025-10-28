@@ -1,6 +1,4 @@
 from django.db import models
-# Create your models here.
-
 
 class EncuentrosEquipos(models.Model):
     idEnc = models.ForeignKey('Encuentros', on_delete=models.CASCADE)
@@ -19,11 +17,13 @@ class Equipos(models.Model):
     idEqu = models.AutoField(primary_key=True)
     oliEqu = models.CharField(max_length=1, choices=[('S', 'S'), ('N', 'N')])
     nomEqu = models.CharField(max_length=50)
+    
     class Meta:
         db_table = 'EQUIPOS'
     
     def __str__(self):
         return f"Equipo {self.nomEqu}"
+
 
 class Participantes(models.Model):
     idPar = models.AutoField(primary_key=True)
@@ -37,6 +37,7 @@ class Participantes(models.Model):
     def __str__(self):
         return self.nomPar
 
+
 class Disciplinas(models.Model):
     idDis = models.AutoField(primary_key=True)
     nomDis = models.CharField(max_length=50)
@@ -48,6 +49,7 @@ class Disciplinas(models.Model):
 
     def __str__(self):
         return self.nomDis
+
 
 class Pistas(models.Model):
     idPis = models.AutoField(primary_key=True)
@@ -61,6 +63,7 @@ class Pistas(models.Model):
     def __str__(self):
         return self.nomPis
 
+
 class Arbitros(models.Model):
     idArb = models.AutoField(primary_key=True)
     nomArb = models.CharField(max_length=50)
@@ -71,17 +74,13 @@ class Arbitros(models.Model):
     def __str__(self):
         return self.nomArb
 
+
+from django.db import models
+from django.core.exceptions import ValidationError
+
+# ... tus otros modelos igual ...
+
 class Encuentros(models.Model):
-    def clean(self):
-        from django.core.exceptions import ValidationError
-        if self.idDis:
-            min_equipos = self.idDis.min_equipos
-            max_equipos = self.idDis.max_equipos
-            equipos_count = self.encuentrosequipos_set.count() if self.pk else 0
-            if equipos_count < min_equipos or equipos_count > max_equipos:
-                raise ValidationError({
-                    '__all__': f'El número de equipos debe estar entre {min_equipos} y {max_equipos} para la disciplina {self.idDis.nomDis}.'
-                })
     ESTADOS = [
         ('P', 'Pendiente'),
         ('E', 'En curso'),
@@ -95,12 +94,52 @@ class Encuentros(models.Model):
     ffinEnc = models.DateTimeField()
     idPis = models.ForeignKey(Pistas, on_delete=models.CASCADE)
     idDis = models.ForeignKey(Disciplinas, on_delete=models.CASCADE)
-    idEqu = models.ManyToManyField(Equipos, through='EncuentrosEquipos', through_fields=('idEnc', 'equipo'))
+    idEqu = models.ManyToManyField(Equipos, through='EncuentrosEquipos')
     idArb = models.ForeignKey(Arbitros, on_delete=models.CASCADE)
 
-    
+    def clean(self):
+        """Validación a nivel de modelo"""
+        # Validación de fechas
+        if self.finiEnc and self.ffinEnc and self.finiEnc >= self.ffinEnc:
+            raise ValidationError({
+                'ffinEnc': 'La fecha de fin debe ser posterior a la fecha de inicio.'
+            })
+        
+        # Validación de equipos (solo si el objeto ya existe)
+        if self.pk and self.idDis:
+            equipos_count = self.encuentrosequipos_set.count()
+            self._validar_cantidad_equipos(equipos_count)
+
+    def _validar_cantidad_equipos(self, equipos_count):
+        """Método auxiliar para validar cantidad de equipos"""
+        if self.idDis:
+            min_equipos = self.idDis.min_equipos
+            max_equipos = self.idDis.max_equipos
+            
+            if equipos_count < min_equipos:
+                raise ValidationError(
+                    f'Se requieren al menos {min_equipos} equipos para la disciplina {self.idDis.nomDis}. '
+                    f'Actualmente tiene {equipos_count}.'
+                )
+            if equipos_count > max_equipos:
+                raise ValidationError(
+                    f'Se permiten máximo {max_equipos} equipos para la disciplina {self.idDis.nomDis}. '
+                    f'Actualmente tiene {equipos_count}.'
+                )
+
+    def save(self, *args, **kwargs):
+        # Forzar la validación al guardar
+        self.clean()
+        super().save(*args, **kwargs)
+
     class Meta:
         db_table = 'ENCUENTROS'
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(finiEnc__lt=models.F('ffinEnc')),
+                name='check_fecha_fin_posterior'
+            )
+        ]
     
     def __str__(self):
         return f"Encuentro {self.finiEnc} - {self.idDis.nomDis}"

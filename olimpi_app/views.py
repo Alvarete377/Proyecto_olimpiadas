@@ -8,5 +8,5 @@ from .models import Encuentros, Disciplinas, Pistas, Arbitros, Equipos, Encuentr
 # Vista basada en clase para listar encuentros (ListView)
 class EncuentrosListView(ListView):
     model = Encuentros
-    context_object_name = 'encuentros'  # ← ¡IMPORTANTE!
+    context_object_name = 'encuentros'
 
